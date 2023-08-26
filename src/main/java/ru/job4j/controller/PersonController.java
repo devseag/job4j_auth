@@ -8,15 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
-import ru.job4j.model.Person;
+import ru.job4j.dto.*;
+import ru.job4j.model.*;
 import ru.job4j.service.*;
 
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/person")
@@ -61,7 +62,7 @@ public class PersonController {
         if (password.length() < 6) {
             throw new IllegalArgumentException("Invalid password. Password length must be more than 5 characters.");
         }
-        person.setPassword(encoder.encode(person.getPassword()));
+        person.setPassword(encoder.encode(password));
         return new ResponseEntity<Person>(
                 this.persons.create(person),
                 HttpStatus.CREATED
@@ -70,6 +71,15 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
+        var login = person.getLogin();
+        var password = person.getPassword();
+        if (login == null || password == null) {
+            throw new NullPointerException("Username and password mustn't be empty");
+        }
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Invalid password. Password length must be more than 5 characters.");
+        }
+        person.setPassword(encoder.encode(password));
         if (this.persons.save(person)) {
             return ResponseEntity.ok().build();
         }
@@ -84,6 +94,25 @@ public class PersonController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    @PatchMapping("/password")
+    public Person newPassword(@RequestBody PersonDTO personDTO) throws InvocationTargetException, IllegalAccessException {
+        String password = personDTO.getPassword();
+        if (password == null) {
+            throw new NullPointerException("Password mustn't be empty");
+        }
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Invalid password. Password length must be more than 5 characters.");
+        }
+        var personOptional = persons.findById(personDTO.getId());
+        if (personOptional == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        var person = personOptional.get();
+        person.setPassword(encoder.encode(password));
+        persons.save(person);
+        return person;
     }
 
     @ExceptionHandler(value = { IllegalArgumentException.class })
