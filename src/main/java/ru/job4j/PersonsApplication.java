@@ -17,6 +17,7 @@ public class PersonsApplication extends SpringBootServletInitializer {
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(PersonsApplication.class);
 	}
+
 	@Bean
 	public SpringLiquibase liquibase(DataSource ds) {
 		SpringLiquibase liquibase = new SpringLiquibase();
