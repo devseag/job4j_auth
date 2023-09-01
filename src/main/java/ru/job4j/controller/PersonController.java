@@ -54,6 +54,15 @@ public class PersonController {
         );
     }
 
+//    Content-Type -> application/json
+//
+//            POST
+//    {
+//        "login": "newone",
+//         "password": "password"
+//    }
+//    curl.exe -H "Content-Type: application/json" -X POST -d {"""login""":""""newone"""","""password""":""""password""""} "http://localhost:8080/person/"
+
     @PostMapping("/")
     @Validated(Operation.OnCreate.class)
     public ResponseEntity<Person> create(@Valid @RequestBody Person person) {
@@ -85,17 +94,38 @@ public class PersonController {
         return ResponseEntity.badRequest().build();
     }
 
+//    Content-Type -> application/json
+//
+//    POST
+//    http://localhost:8080/login
+//    {
+//        "login": "admin",
+//        "password": "password"
+//    }
+//   getting Bearer...
+
+//    Authorization -> Bearer eyJ0eAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCIMTY5NDM5Nzk1NH0.fSMBqD2LlH3_LKSspmK6JddmeRyHKnYykzvPUBK43teT0U7Z9JtfnNdFapEEsT2sPKoI40SRpIrdM_S0C_CQIg
+
+//    Content-Type -> application/json
+//
+//    PATCH
+//    {
+//        "id": 4,
+//            "login": "admin",
+//            "password": "password"
+//    }
+
     @PatchMapping("/password")
     public Person newPassword(@Valid @RequestBody PersonDTO personDTO) throws InvocationTargetException, IllegalAccessException {
         String password = personDTO.getPassword();
-        if (password == null) {
-            throw new NullPointerException("Password mustn't be empty");
-        }
-        if (password.length() < 6) {
-            throw new IllegalArgumentException("Invalid password. Password length must be more than 5 characters.");
-        }
+//        if (password == null) {
+//            throw new NullPointerException("Password mustn't be empty");
+//        }
+//        if (password.length() < 6) {
+//            throw new IllegalArgumentException("Invalid password. Password length must be more than 5 characters.");
+//        }
         var personOptional = persons.findById(personDTO.getId());
-        if (personOptional == null) {
+        if (personOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         var person = personOptional.get();
